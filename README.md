@@ -11,7 +11,7 @@ The device samples acceleration and orientation data to estimate wave dynamics, 
 * **RAM-Based Land Calibration:** Performs a 100-sample sensor calibration during `setup()` to lock initial land offsets into RAM. *Note: The device needs a manual reset/cold start on dry land before deployment.* Continuous sensor drift is eliminated during runtime using a low-pass filter.
 * **High-Precision GPS:** Interfaces with a GPS module via `TinyGPS++`. Implements a strict quality gate requiring an HDOP less than or equal to 2.0 and at least 8 connected satellites before locking location.
 * **Sea Temperature Sensing:** Reads water temperature using a **DS18B20** sensor via OneWire.
-* **Low-Power Optimization:** Strictly manages hardware power rails by toggling `Vext` and a dedicated `SENSOR_POWER_PIN` (GPIO2) to completely cut power to peripheral sensors during deep sleep cycles.
+* **Low-Power Optimization:** Strictly manages hardware power rails by toggling `Vext` and a dedicated `SENSOR_POWER_PIN` (GPIO2) to control and cut power directly to peripheral sensors during deep sleep cycles.
 * **Efficient Payload Packing:** Packs battery level, wave metrics, temperature, and high-precision coordinates into a compact 14-byte array to minimize time-on-air.
 
 ## Hardware Components
