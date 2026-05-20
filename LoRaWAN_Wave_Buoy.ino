@@ -29,8 +29,8 @@ uint8_t appPort = 2;
 
 /* --- OPERATION SETTINGS --- */
 #define SENSOR_POWER_PIN GPIO2   
-#define MEASURE_DURATION_MS 12000 // 20 minutes sampling (scaled down duration)
-#define SLEEP_CYCLE_MS 24000      // 40 minutes deep sleep (scaled down duration)
+#define MEASURE_DURATION_MS 1200000 // 20 minutes sampling
+#define SLEEP_CYCLE_MS 2400000      // 40 minutes deep sleep (Total 60 min cycle)
 #define GPS_MAX_WAIT_MS 300000    // 5 minutes timeout for GPS fix
 
 /* --- OBJECTS --- */
@@ -187,6 +187,12 @@ static void prepareTxFrame(uint8_t port) {
   // GPS (Precision requires HDOP <= 2.0 AND at least 8 satellites, max wait time 5 minutes)
   unsigned long gpsStart = millis();
   bool gotGoodFix = false;
+
+  // --- MEMORY FIX: Resets GPS object and coordinates before searching ---
+  gps = TinyGPSPlus();
+  currentLat = 0.0;
+  currentLon = 0.0;
+
   while (millis() - gpsStart < GPS_MAX_WAIT_MS) {
     CyDelay(1); 
     while (Serial1.available() > 0) {
@@ -243,9 +249,18 @@ static void prepareTxFrame(uint8_t port) {
   Serial.print("Hs:           "); Serial.print(currentHs, 2); Serial.println(" m");
   Serial.print("Temperature:  "); Serial.print(currentTemp, 1); Serial.println(" C");
   Serial.print("Latitude:     "); Serial.print(currentLat, 5); Serial.println();
-  Serial.print("Longitude:    "); Serial.print(currentLon, 5); Serial.println("\n");
+  Serial.print("Longitude:    "); Serial.print(currentLon, 5); Serial.println();
 
-  // Changed TX power parameter from 22 to 14 dBm
+  // --- PRINT ACTUAL PAYLOAD IN HEX ---
+  Serial.print("Raw Payload (HEX): ");
+  for (int i = 0; i < appDataSize; i++) {
+    if (appData[i] < 0x10) Serial.print("0"); 
+    Serial.print(appData[i], HEX);
+    Serial.print(" ");
+  }
+  Serial.println("\n");
+
+  // Transmit Power set to 14 dBm
   Radio.SetTxConfig( MODEM_LORA, 14, 0, 0, 12, 1, 8, false, true, 0, 0, false, 3000 );
   lastMeasureFinishTime = millis();
 }
